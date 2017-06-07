@@ -62,7 +62,7 @@ def zoneout(x, keep_prob, noise_shape=None, seed=None, name=None):
         return 1. - ret
 
 
-class QRNN_pooling(tf.nn.rnn_cell.RNNCell):
+class QRNN_pooling(tf.contrib.rnn.RNNCell):
 
     def __init__(self, out_fmaps, pool_type):
         self.__pool_type = pool_type
