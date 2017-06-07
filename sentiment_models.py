@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tf_qrnn import QRNNLayer, DenseQRNNLayers, fo_pool
-from qrnn.py import QRNN_layer as QRNNLayer2
+from qrnn import QRNN_layer as QRNNLayer2
 
 
 class SentimentModel:
