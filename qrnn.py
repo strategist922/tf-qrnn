@@ -61,7 +61,7 @@ def zoneout(x, keep_prob, noise_shape=None, seed=None, name=None):
         return 1. - ret
 
 
-class QRNN_pooling(tf.nn.rnn_cell.RNNCell):
+class QRNN_pooling(tf.contrib.rnn.RNNCell):
 
     def __init__(self, out_fmaps, pool_type):
         self.__pool_type = pool_type
@@ -85,21 +85,21 @@ class QRNN_pooling(tf.nn.rnn_cell.RNNCell):
         with tf.variable_scope(scope or "QRNN-{}-pooling".format(pool_type)):
             if pool_type == 'f':
                 # extract Z activations and F gate activations
-                Z, F = tf.split(1, 2, inputs)
+                Z, F = tf.split(inputs, 2, 1)
                 # return the dynamic average pooling
-                output = tf.mul(F, state) + tf.mul(tf.sub(1., F), Z)
+                output = tf.multiply(F, state) + tf.multiply(tf.subtract(1., F), Z)
                 return output, output
             elif pool_type == 'fo':
                 # extract Z, F gate and O gate
-                Z, F, O = tf.split(1, 3, inputs)
-                new_state = tf.mul(F, state) + tf.mul(tf.sub(1., F), Z)
-                output = tf.mul(O, new_state)
+                Z, F, O = tf.split(inputs, 3, 1)
+                new_state = tf.multiply(F, state) + tf.multiply(tf.subtract(1., F), Z)
+                output = tf.multiply(O, new_state)
                 return output, new_state
             elif pool_type == 'ifo':
                 # extract Z, I gate, F gate, and O gate
-                Z, I, F, O = tf.split(1, 4, inputs)
-                new_state = tf.mul(F, state) + tf.mul(I, Z)
-                output = tf.mul(O, new_state)
+                Z, I, F, O = tf.split(inputs, 4, 1)
+                new_state = tf.multiply(F, state) + tf.multiply(I, Z)
+                output = tf.multiply(O, new_state)
                 return output, new_state
             else:
                 raise ValueError('Pool type must be either f, fo or ifo')
@@ -142,7 +142,7 @@ class QRNN_layer(object):
             Z, gates = self.convolution(input_, fwidth, out_fmaps, pool_type,
                                         zoneout)
             # join all features (Z and gates) into Tensor at dim 2 merged
-            T = tf.concat(2, [Z] + gates)
+            T = tf.concat([Z] + gates, 2)
             # create the pooling layer
             pooling = QRNN_pooling(out_fmaps, pool_type)
             self.initial_state = pooling.zero_state(batch_size=batch_size,
