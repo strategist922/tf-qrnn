@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tf_qrnn import QRNNLayer, DenseQRNNLayers, fo_pool
+from qrnn.py import QRNN_layer as QRNNLayer2
 
 
 class SentimentModel:
@@ -98,6 +99,20 @@ class QRNNModel(SentimentModel):
         return x
 
 
+class QRNNModel2(SentimentModel):
+    def forward(self):
+        inputs = self.inputs
+
+        num_layers = 4
+        num_convs = 256
+        conv_size = 2
+        x = tf.squeeze(self._get_embeddings(inputs))
+        for i in range(num_layers):
+            layer = QRNNLayer2(num_convs, conv_size, zoneout=0.0)
+            x, _ = layer(x)
+        return tf.squeeze(x)
+
+
 class DenseQRNNModel(SentimentModel):
     def forward(self):
         inputs = self.inputs
@@ -107,9 +122,9 @@ class DenseQRNNModel(SentimentModel):
         num_convs = 256
         conv_size = 2
         x = self._get_embeddings(inputs)
-        qrnn = DenseQRNNModel(input_size,
-                              conv_size,
-                              num_convs,
-                              range(num_layers))
+        qrnn = DenseQRNNLayers(input_size,
+                               conv_size,
+                               num_convs,
+                               range(num_layers))
         x = qrnn.compute(x)
         return tf.squeeze(x)
