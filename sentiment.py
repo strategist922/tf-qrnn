@@ -13,23 +13,25 @@ SEQ_LEN = 400
 VOCAB_SIZE = 68379
 CKPT_PATH = './checkpoints'
 # TODO
-# run other qrnn implementation
-# make sure using float32
-# add regularization
+# see if checkpointing works
+# try dense
+# remove num_channels parameter
+# remove feed_state
 # do penn treebank
 # some seq2seq task
-# add zoneout
 
 
 def run(model, sess, dataset, train=False):
     j = 0
     prog = utils.Progbar(len(dataset))
     avg_loss = 0.0
+    avg_correct = 0.0
     for x, masks, y in dataset:
         input_feed = {
             model.inputs: utils.convert_to_np(x),
             model.masks: utils.convert_to_np(masks),
-            model.labels: utils.convert_to_np(y)
+            model.labels: utils.convert_to_np(y),
+            model.train: train
         }
         if train:
             output_feed = [model.cost, model.accuracy,
@@ -39,12 +41,14 @@ def run(model, sess, dataset, train=False):
             output_feed = [model.cost, model.accuracy, model.average_guess]
             cost, num_correct, avg_guess = sess.run(output_feed, input_feed)
         avg_loss += cost
+        avg_correct += num_correct
         j += 1
         prog.update(j,
                     values=[('num_correct', num_correct)],
-                    exact=[('cost', cost), ('avg_guess', avg_guess)])
+                    exact=[('cost', cost)])
     avg_loss /= len(dataset)
-    return avg_loss
+    avg_correct /= len(dataset)
+    return avg_correct, avg_loss
 
 
 def train(vocab, embeddings, train_data, dev_data, test_data):
@@ -53,34 +57,34 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         utils.check_restore_parameters(sess, saver, CKPT_PATH)
-        best_dev_loss = model.best_dev_loss.eval()
+        best_dev_acc = model.best_dev_acc.eval()
 
         for i in range(NUM_EPOCHS):
             print 'epoch', i
             sess.run(tf.assign(model.epoch, i))
             # train
             print 'training'
-            train_loss = run(model, sess, train_data, train=True)
+            train_acc, train_loss = run(model, sess, train_data, train=True)
             print
             print 'average train loss', train_loss
 
             # eval on dev
             print 'evaluating dev'
-            dev_loss = run(model, sess, dev_data)
+            dev_acc, dev_loss = run(model, sess, dev_data)
             print
             print 'average dev loss:', dev_loss
 
             # eval on test
             print 'evaluating test'
-            test_loss = run(model, sess, test_data)
+            test_acc, test_loss = run(model, sess, test_data)
             print
             print 'average test loss:', test_loss
 
-            if best_dev_loss is None or dev_loss < best_dev_loss:
-                best_dev_loss = dev_loss
-                sess.run(tf.assign(model.best_dev_loss, best_dev_loss))
+            if best_dev_acc is None or dev_loss < best_dev_acc:
+                best_dev_acc = dev_acc
+                sess.run(tf.assign(model.best_dev_acc, best_dev_acc))
                 saver.save(sess, os.path.join(CKPT_PATH, 'sentiment'))
-                print 'saved new best dev loss'
+                print 'saved new best dev acc'
 
             print
 
@@ -91,11 +95,11 @@ def init_embeddings(embeddings, vocab, dim):
     num_vars = 0
     num_const = 0
     for i in range(3):
-        var = tf.Variable(init(shape=[dim]))
+        var = tf.Variable(init(shape=[dim]), dtype=tf.float32)
         embed_list.append(var)
     for _id, word in vocab.iteritems():
         if int(_id) in embeddings.keys():
-            embed_list.append(tf.constant(embeddings[_id]))
+            embed_list.append(tf.constant(embeddings[_id]), dtype=tf.float32)
             num_const += 1
         else:
             # var = tf.Variable(init(shape=[dim]))

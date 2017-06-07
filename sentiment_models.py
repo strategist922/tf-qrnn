@@ -1,9 +1,9 @@
 import tensorflow as tf
-from tf_qrnn import QRNNLayer, DenseQRNNLayers, fo_pool
+from tf_qrnn import QRNNLayer, DenseQRNNLayers
 
 
 class SentimentModel:
-    def __init__(self, embeddings, BATCH_SIZE, SEQ_LEN):
+    def __init__(self, embeddings, BATCH_SIZE, SEQ_LEN, beta=4e-6):
         self.batch_size = BATCH_SIZE
         self.seq_len = SEQ_LEN
         self.embeddings = embeddings
@@ -14,8 +14,13 @@ class SentimentModel:
                                     name="mask")
         self.labels = tf.placeholder(tf.int32, [BATCH_SIZE], name="labels")
 
-        x = self.forward()
+        self.train = tf.placeholder(tf.bool, [], name='train')
+
+        x, weights = self.forward()
         loss = self.inference(x)
+        if weights:
+            for w in weights:
+                loss += beta*tf.nn.l2_loss(w)
         self.setup_learning(loss)
 
     def forward(self):
@@ -70,10 +75,11 @@ class VanillaNNModel(SentimentModel):
         x = tf.squeeze(self._get_embeddings(inputs))
         for i in range(num_layers):
             x = tf.layers.dense(x, num_convs)
+            x = tf.sigmoid(x)
             x = tf.nn.dropout(x, keep_prob=0.7)
 
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        return x
+        return x, None
 
 
 class QRNNModel(SentimentModel):
@@ -85,17 +91,20 @@ class QRNNModel(SentimentModel):
         num_convs = 256
         conv_size = 2
         x = self._get_embeddings(inputs)
+        weights = []
         for i in range(num_layers):
             print 'initializing qrnn layer', i
-            if i == 0:
-                layer = QRNNLayer(input_size, conv_size, num_convs, str(i))
-            else:
-                layer = QRNNLayer(num_convs, conv_size, num_convs, str(i))
-            Z, F, O = layer.conv(x)
-            F = 1 - tf.nn.dropout(F, keep_prob=0.7)
-            x = fo_pool(Z, F, O)  # dims: [batch x seq x state x in]
+            in_size = input_size if i == 0 else num_convs
+            layer = QRNNLayer(in_size, conv_size, num_convs, str(i),
+                              zoneout=0.0)
+            weights.append(layer.W)
+            weights.append(layer.b)
+            x = layer(inputs, train=self.train)
+            x = tf.cond(self.train,
+                        lambda: tf.nn.dropout(x, 0.7),
+                        lambda: x)
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        return x
+        return x, weights
 
 
 class DenseQRNNModel(SentimentModel):
@@ -107,9 +116,26 @@ class DenseQRNNModel(SentimentModel):
         num_convs = 256
         conv_size = 2
         x = self._get_embeddings(inputs)
-        qrnn = DenseQRNNModel(input_size,
-                              conv_size,
-                              num_convs,
-                              range(num_layers))
+        qrnn = DenseQRNNLayers(input_size,
+                               conv_size,
+                               num_convs,
+                               range(num_layers),
+                               dropout=0.3)
         x = qrnn.compute(x)
-        return tf.squeeze(x)
+        weights = [l.W for l in qrnn.layers] + [l.b for l in qrnn.layers]
+        return tf.squeeze(x), weights
+
+
+class LSTMModel(SentimentModel):
+    def forward(self):
+        inputs = self.inputs
+
+        num_layers = 4
+        hidden_size = 256
+
+        x = tf.squeeze(self._get_embeddings(inputs))
+        cell = tf.contrib.rnn.BasicLSTMCell(hidden_size)
+        cells = tf.contrib.rnn.MultiRNNCell([cell] * num_layers)
+        x = tf.nn.dynamic_rnn(cells, x)
+
+        return tf.squeeze(x), None
