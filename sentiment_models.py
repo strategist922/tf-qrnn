@@ -54,10 +54,10 @@ class SentimentModel:
                                  dtype=tf.int32,
                                  trainable=False,
                                  name='epoch')
-        self.best_dev_loss = tf.Variable(float('inf'),
+        self.best_dev_acc = tf.Variable(float('inf'),
                                          dtype=tf.float32,
                                          trainable=False,
-                                         name='best_dev_loss')
+                                         name='best_dev_acc')
 
     def _get_embeddings(self, ids):
         # return dims: [batch x seq x state x 1]
@@ -76,7 +76,9 @@ class VanillaNNModel(SentimentModel):
         for i in range(num_layers):
             x = tf.layers.dense(x, num_convs)
             x = tf.sigmoid(x)
-            x = tf.nn.dropout(x, keep_prob=0.7)
+            x = tf.cond(self.train,
+                        lambda: tf.nn.dropout(x, 0.7),
+                        lambda: x)
 
         x = tf.squeeze(x)  # dims: [batch x seq x state]
         return x, None
