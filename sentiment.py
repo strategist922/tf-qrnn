@@ -4,7 +4,7 @@ import tensorflow as tf
 import utils
 
 from time import time
-from sentiment_models import QRNNModel2 as Model
+from sentiment_models import QRNNModel as Model
 
 
 NUM_EPOCHS = 10

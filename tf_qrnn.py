@@ -77,7 +77,7 @@ class QRNNLayer:
         return padded_inputs
 
 
-class FullConnectedQRNNLayers:
+class DenseQRNNLayers:
     def __init__(self, input_size, conv_size, hidden_size, layer_ids,
                  center_conv=False, feed_state=False, num_layers=4,
                  pool_functions=None):
@@ -97,36 +97,8 @@ class FullConnectedQRNNLayers:
         for i in range(self.num_layers):
             Z, F, O = self.layers[i].conv(inputs, states[i])
             outputs = self.pool_functions[i](Z, F, O)
-            inputs = tf.concat(3, [inputs, outputs])
+            inputs = tf.concat([inputs, outputs], 3)
         return tf.squeeze(outputs[:, :, :, -1])
-
-
-# class foPoolCell(tf.nn.rnn_cell.RNNCell):
-#     def __init__(self, size):
-#         self.size = size
-#
-#     @property
-#     def state_size(self):
-#         return self.size
-#
-#     @property
-#     def output_size(self):
-#         return self.size
-#
-#     def __call__(self, inputs, state, scope=None):
-#         z, f, o = tf.split(inputs, 3, 3)
-#         new_state = tf.mul(f, state) + tf.mul(tf.sub(1., f), z)
-#         output = tf.mul(o, new_state)
-#         return output, new_state
-#
-#
-# def fo_pool_by_rnn(inputs, size, batch_size):
-#     cell = foPoolCell(size)
-#     initial_state = cell.zero_state(batch_size=batch_size,
-#                                     dtype=tf.float32)
-#     H, last_C = tf.nn.dynamic_rnn(cell, inputs,
-#                                   initial_state=initial_state)
-#     return H
 
 
 def fo_pool(Z, F, O):
@@ -134,11 +106,23 @@ def fo_pool(Z, F, O):
     F = tf.unstack(F, axis=1)
     O = tf.unstack(O, axis=1)
     C = [tf.fill(tf.shape(Z[0]), 0.0)]
-    H = [tf.fill(tf.shape(Z[0]), 0.0)]
-    for i in range(1, len(Z)):
+    H = []
+    for i in range(len(Z)):
         c = tf.multiply(F[i], C[-1]) + tf.multiply(1-F[i], Z[i])
         h = tf.multiply(O[i], c)
         C.append(c)
         H.append(h)
     H = tf.stack(H, axis=1)
+    return tf.transpose(H, perm=[0, 1, 3, 2])
+
+
+def f_pool(Z, F, O):
+    Z = tf.unstack(Z, axis=1)
+    F = tf.unstack(F, axis=1)
+    O = tf.unstack(O, axis=1)
+    H = [tf.fill(tf.shape(Z[0]), 0.0)]
+    for i in range(len(Z)):
+        h = tf.multiply(F[i], H[-1]) + tf.multiply(1-F[i], Z[i])
+        H.append(h)
+    H = tf.stack(H[1:], axis=1)
     return tf.transpose(H, perm=[0, 1, 3, 2])
