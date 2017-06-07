@@ -108,7 +108,7 @@ class QRNNModel2(SentimentModel):
         conv_size = 2
         x = tf.squeeze(self._get_embeddings(inputs))
         for i in range(num_layers):
-            layer = QRNNLayer2(num_convs, conv_size, zoneout=0.0)
+            layer = QRNNLayer2(num_convs, conv_size, zoneout=0.0, name=str(i))
             x, _ = layer(x)
         return tf.squeeze(x)
 
