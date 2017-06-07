@@ -80,7 +80,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
             print
             print 'average test loss:', test_loss
 
-            if best_dev_acc is None or dev_loss < best_dev_acc:
+            if best_dev_acc is None or dev_acc >=  best_dev_acc:
                 best_dev_acc = dev_acc
                 sess.run(tf.assign(model.best_dev_acc, best_dev_acc))
                 saver.save(sess, os.path.join(CKPT_PATH, 'sentiment'))
@@ -99,7 +99,7 @@ def init_embeddings(embeddings, vocab, dim):
         embed_list.append(var)
     for _id, word in vocab.iteritems():
         if int(_id) in embeddings.keys():
-            embed_list.append(tf.constant(embeddings[_id]), dtype=tf.float32)
+            embed_list.append(tf.constant(embeddings[_id], dtype=tf.float32))
             num_const += 1
         else:
             # var = tf.Variable(init(shape=[dim]))

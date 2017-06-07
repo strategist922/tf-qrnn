@@ -101,7 +101,7 @@ class QRNNModel(SentimentModel):
                               zoneout=0.0)
             weights.append(layer.W)
             weights.append(layer.b)
-            x = layer(inputs, train=self.train)
+            x = layer(x, train=self.train)
             x = tf.cond(self.train,
                         lambda: tf.nn.dropout(x, 0.7),
                         lambda: x)
