@@ -143,7 +143,7 @@ class QRNN_layer(object):
             Z, gates = self.convolution(input_, fwidth, out_fmaps, pool_type,
                                         zoneout)
             # join all features (Z and gates) into Tensor at dim 2 merged
-            T = tf.concat(2, [Z] + gates)
+            T = tf.concat([Z] + gates, 2)
             # create the pooling layer
             pooling = QRNN_pooling(out_fmaps, pool_type)
             self.initial_state = pooling.zero_state(batch_size=batch_size,

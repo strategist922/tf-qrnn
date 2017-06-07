@@ -110,7 +110,8 @@ class QRNNModel2(SentimentModel):
         for i in range(num_layers):
             print 'initializing qrnn layer', i
             layer = QRNNLayer2(num_convs, pool_type='fo',
-                               name='QRNN_layer{}'.format(str(i)))
+                               name='QRNN_layer{}'.format(str(i)),
+                               zoneout=0.0)
             qrnn_h, last_state = layer(x)
             qrnn_h_f = tf.reshape(qrnn_h, [-1, self.qrnn_size])
             qrnn_h_dout = tf.nn.dropout(qrnn_h_f, 0.7,
