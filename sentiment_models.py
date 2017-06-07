@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tf_qrnn import QRNNLayer, fo_pool
+from qrnn import QRNN_layer as QRNNLayer2
 
 
 class SentimentModel:
@@ -83,7 +84,7 @@ class QRNNModel(SentimentModel):
         num_layers = 4
         input_size = 300
         num_convs = 256
-        conv_size = 3
+        conv_size = 2
         x = self._get_embeddings(inputs)
         for i in range(num_layers):
             print 'initializing qrnn layer', i
@@ -96,3 +97,24 @@ class QRNNModel(SentimentModel):
             x = fo_pool(Z, F, O)  # dims: [batch x seq x state x in]
         x = tf.squeeze(x)  # dims: [batch x seq x state]
         return x
+
+
+class QRNNModel2(SentimentModel):
+    def forward(self):
+        inputs = self.inputs
+        num_layers = 4
+        # input_size = 300
+        num_convs = 256
+        # conv_size = 2
+        x = tf.squeeze(self._get_embeddings(inputs))
+        for i in range(num_layers):
+            print 'initializing qrnn layer', i
+            layer = QRNNLayer2(num_convs, pool_type='fo',
+                               name='QRNN_layer{}'.format(str(i)))
+            qrnn_h, last_state = layer(x)
+            qrnn_h_f = tf.reshape(qrnn_h, [-1, self.qrnn_size])
+            qrnn_h_dout = tf.nn.dropout(qrnn_h_f, 0.7,
+                                        name='dout_qrnn{}'.format(layer))
+            qrnn_h = tf.reshape(qrnn_h_dout, [self.batch_size, -1, num_convs])
+            x = qrnn_h
+        return qrnn_h

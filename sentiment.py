@@ -4,7 +4,7 @@ import tensorflow as tf
 import utils
 
 from time import time
-from sentiment_models import VanillaNNModel, QRNNModel
+from sentiment_models import QRNNModel2 as Model
 
 
 NUM_EPOCHS = 10
@@ -47,7 +47,7 @@ def run(model, sess, dataset, train=False):
 
 
 def train(vocab, embeddings, train_data, dev_data, test_data):
-    model = QRNNModel(embeddings, BATCH_SIZE, SEQ_LEN)
+    model = Model(embeddings, BATCH_SIZE, SEQ_LEN)
     saver = tf.train.Saver()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
