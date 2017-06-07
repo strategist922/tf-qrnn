@@ -17,6 +17,7 @@ CKPT_PATH = './checkpoints'
 # clean
 #   decompose training sequence
 # make sure using float32
+# add regularization
 
 
 def run(model, sess, dataset, train=False):
