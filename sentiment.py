@@ -13,11 +13,12 @@ SEQ_LEN = 400
 VOCAB_SIZE = 68379
 CKPT_PATH = './checkpoints'
 # TODO
-# CROSS VALIDATE W OTHER QRNN implementations
-# clean
-#   decompose training sequence
+# run other qrnn implementation
 # make sure using float32
 # add regularization
+# do penn treebank
+# some seq2seq task
+# add zoneout
 
 
 def run(model, sess, dataset, train=False):

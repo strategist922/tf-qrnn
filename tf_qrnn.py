@@ -1,9 +1,6 @@
 import tensorflow as tf
 
 
-# TODO
-# do penn treebank
-# some seq2seq task
 class QRNNLayer:
     def __init__(self, input_size, conv_size, hidden_size, layer_id,
                  center_conv=False, feed_state=False, num_in_channels=1):
