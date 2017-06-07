@@ -88,12 +88,12 @@ class QRNN_pooling(tf.contrib.rnn.RNNCell):
                 # extract Z activations and F gate activations
                 Z, F = tf.split(inputs, 2, 1)
                 # return the dynamic average pooling
-                output = tf.multiply(F, state) + tf.multiply(tf.sub(1., F), Z)
+                output = tf.multiply(F, state) + tf.multiply(tf.subtract(1., F), Z)
                 return output, output
             elif pool_type == 'fo':
                 # extract Z, F gate and O gate
                 Z, F, O = tf.split(inputs, 3, 1)
-                new_state = tf.multiply(F, state) + tf.multiply(tf.sub(1., F), Z)
+                new_state = tf.multiply(F, state) + tf.multiply(tf.subtract(1., F), Z)
                 output = tf.multiply(O, new_state)
                 return output, new_state
             elif pool_type == 'ifo':
