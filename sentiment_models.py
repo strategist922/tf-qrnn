@@ -102,13 +102,10 @@ class QRNNModel(SentimentModel):
             weights.append(layer.W)
             weights.append(layer.b)
             x = layer(x, train=self.train)
-            x = tf.Print(x, [tf.reduce_sum(x)])
             x = tf.cond(self.train,
                         lambda: tf.nn.dropout(x, 0.7),
                         lambda: x)
-            x = tf.Print(x, [tf.reduce_sum(x)])
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        x = tf.Print(x, [tf.reduce_sum(x)])
         return x, weights
 
 

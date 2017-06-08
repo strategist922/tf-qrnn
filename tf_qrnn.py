@@ -42,7 +42,9 @@ class QRNNLayer:
                 self.b_v = tf.get_variable('b_v', [hidden_size*(len(pool)+1)])
 
     def __call__(self, inputs, state=None, train=None):
+        inputs = tf.Print(inputs, [tf.reduce_sum(inputs)])
         gates = self.conv(inputs, state)
+        gates = tf.Print(gates, [tf.reduce_sum(gates)])
         if self.zoneout and self.zoneout > 0.0:
             F = gates[2]
             F = tf.cond(train,
