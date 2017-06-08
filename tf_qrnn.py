@@ -44,7 +44,6 @@ class QRNNLayer:
     def __call__(self, inputs, state=None, train=None):
         inputs = tf.Print(inputs, [tf.reduce_sum(inputs)])
         gates = self.conv(inputs, state)
-        gates[0] = tf.Print(gates[0], [tf.reduce_sum(gates)])
         if self.zoneout and self.zoneout > 0.0:
             F = gates[2]
             F = tf.cond(train,
