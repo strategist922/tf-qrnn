@@ -144,6 +144,7 @@ class DenseQRNNLayers:
                  feed_state=False):
         self.layers = []
         self.num_layers = num_layers
+        self.hidden_size = hidden_size
         self.dropout = dropout
         for i in range(num_layers):
             pool = 'fo' if i is not 0 else 'f'
@@ -156,6 +157,7 @@ class DenseQRNNLayers:
     def __call__(self, inputs, states=None, train=None):
         if states is None:
             states = [None] * self.num_layers
+        inputs = tf.layers.dense(inputs, self.hidden_size)
         for layer in self.layers:
             outputs = layer(inputs, train=train)
             if self.dropout and self.dropout > 0:
