@@ -66,6 +66,7 @@ class QRNNLayer:
         # Z, F, O dims: [batch x seq x in x num_conv]
 
         if self.feed_state:
+            print 'feeding state'
             linear_state = tf.nn.xw_plus_b(state, self.W_v, self.b_v)
             # linear_state dims: [batch x state*3]
             state_gates = tf.split(linear_state, (len(self.pool)+1), 1)
@@ -76,7 +77,7 @@ class QRNNLayer:
         gates[0] = tf.tanh(gates[0])
         for g in gates[1:]:
             g = tf.sigmoid(g)
-
+        print len(gates), gates[0]
         return gates  # list of gates ex. [Z, F, O]
 
     def f_pool(self, gates):
