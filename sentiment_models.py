@@ -123,9 +123,8 @@ class DenseQRNNModel(SentimentModel):
                                num_convs,
                                range(num_layers),
                                num_layers,
-                               dropout=0.3,
-                               train=self.train)
-        x = qrnn(x)
+                               dropout=0.3)
+        x = qrnn(x, train=self.train)
         weights = [l.W for l in qrnn.layers] + [l.b for l in qrnn.layers]
         return tf.squeeze(x), weights
 
