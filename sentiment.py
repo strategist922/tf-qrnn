@@ -13,6 +13,8 @@ SEQ_LEN = 400
 VOCAB_SIZE = 68379
 CKPT_PATH = './checkpoints'
 # TODO
+# try LSTMModel
+# time it
 # see if checkpointing works
 # try dense
 # remove num_channels parameter
@@ -58,8 +60,9 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
         sess.run(tf.global_variables_initializer())
         utils.check_restore_parameters(sess, saver, CKPT_PATH)
         best_dev_acc = model.best_dev_acc.eval()
+        epoch = model.epoch.eval()
 
-        for i in range(NUM_EPOCHS):
+        for i in range(epoch, NUM_EPOCHS):
             print 'epoch', i
             sess.run(tf.assign(model.epoch, i))
             # train
@@ -80,7 +83,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
             print
             print 'average test loss:', test_loss
 
-            if best_dev_acc is None or dev_acc >=  best_dev_acc:
+            if best_dev_acc is None or dev_acc >= best_dev_acc:
                 best_dev_acc = dev_acc
                 sess.run(tf.assign(model.best_dev_acc, best_dev_acc))
                 saver.save(sess, os.path.join(CKPT_PATH, 'sentiment'))

@@ -55,9 +55,9 @@ class SentimentModel:
                                  trainable=False,
                                  name='epoch')
         self.best_dev_acc = tf.Variable(float('inf'),
-                                         dtype=tf.float32,
-                                         trainable=False,
-                                         name='best_dev_acc')
+                                        dtype=tf.float32,
+                                        trainable=False,
+                                        name='best_dev_acc')
 
     def _get_embeddings(self, ids):
         # return dims: [batch x seq x state x 1]
@@ -124,7 +124,7 @@ class DenseQRNNModel(SentimentModel):
                                range(num_layers),
                                num_layers,
                                dropout=0.3)
-        x = qrnn.compute(x)
+        x = qrnn(x)
         weights = [l.W for l in qrnn.layers] + [l.b for l in qrnn.layers]
         return tf.squeeze(x), weights
 
