@@ -18,7 +18,7 @@ models = {
 
 NUM_EPOCHS = 10
 BATCH_SIZE = 25
-SEQ_LEN = 200
+SEQ_LEN = 400
 VOCAB_SIZE = 68379
 # TODO
 # try LSTMModel
