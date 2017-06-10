@@ -60,7 +60,6 @@ class QRNNLayer:
         gates[0] = tf.tanh(gates[0])
         for i in range(1, len(gates)):
             gates[i] = tf.sigmoid(gates[i])
-        print len(gates), gates[0]
         return gates  # list of gates ex. [Z, F, O]
 
     def f_pool(self, gates):

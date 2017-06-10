@@ -146,6 +146,7 @@ class LSTMModel(SentimentModel):
             tf.contrib.rnn.BasicLSTMCell(hidden_size)
             for i in range(num_layers)
         ])
-        x = tf.nn.dynamic_rnn(cells, x, dtype=tf.float32)
+        initial_state = cells.zero_state(self.batch_size, dtype=tf.float32)
+        x = tf.nn.dynamic_rnn(cells, x, initial_state=initial_state)
 
         return tf.squeeze(x), None
