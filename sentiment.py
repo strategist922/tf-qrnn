@@ -103,6 +103,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
                 print 'saved new best dev acc'
 
             print '-'*80
+            print
 
 
 def init_embeddings(embeddings, vocab, dim):
