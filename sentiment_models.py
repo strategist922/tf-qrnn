@@ -142,8 +142,10 @@ class LSTMModel(SentimentModel):
         hidden_size = 256
 
         x = tf.squeeze(self._get_embeddings(inputs))
-        cell = tf.contrib.rnn.BasicLSTMCell(hidden_size)
-        cells = tf.contrib.rnn.MultiRNNCell([cell] * num_layers)
+        cells = tf.contrib.rnn.MultiRNNCell([
+            tf.contrib.rnn.BasicLSTMCell(hidden_size)
+            for i in range(num_layers)
+        ])
         x = tf.nn.dynamic_rnn(cells, x, dtype=tf.float32)
 
         return tf.squeeze(x), None
