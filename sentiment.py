@@ -73,7 +73,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
             start = time()
 
             print 'epoch', i
-            sess.run(tf.assign(model.epoch, i))
+
             # train
             print 'training'
             train_acc, train_loss = run(model, sess, train_data, train=True)
@@ -91,6 +91,8 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
             test_acc, test_loss = run(model, sess, test_data)
             print
             print 'average test loss:', test_loss
+
+            sess.run(tf.assign(model.epoch, i+1))
 
             if best_dev_acc is None or dev_acc >= best_dev_acc:
                 best_dev_acc = dev_acc
