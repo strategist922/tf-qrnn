@@ -123,7 +123,7 @@ def init_embeddings(embeddings, vocab, dim):
 
 
 if __name__ == '__main__':
-    assert sys.argv[1] in Models
+    assert sys.argv[1] in models.keys()
     print 'using model', sys.argv[1]
 
     print 'loading data'
