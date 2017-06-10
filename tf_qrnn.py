@@ -3,7 +3,7 @@ import tensorflow as tf
 
 class QRNNLayer:
     def __init__(self, input_size, conv_size, hidden_size, layer_id, pool='fo',
-                 zoneout=0.0, center_conv=False):
+                 zoneout=0.0, center_conv=False, num_in_channels=1):
 
         pooling_functions = {
             'f': self.f_pool,
@@ -20,12 +20,13 @@ class QRNNLayer:
         self.pool_f = pooling_functions[pool]
         self.zoneout = zoneout
         self.center_conv = center_conv
+        self.num_in_channels = num_in_channels
         if center_conv:
             assert conv_size % 2 == 1
         init = tf.random_normal_initializer()
         filter_shape = [conv_size,
                         input_size,
-                        1,
+                        num_in_channels,
                         hidden_size*(len(pool)+1)]
 
         with tf.variable_scope('QRNN/conv/'+str(layer_id)):
@@ -131,9 +132,9 @@ class DenseQRNNLayers:
         self.dropout = dropout
         for i in range(num_layers):
             pool = 'fo' if i is not 0 else 'f'
-            layer = QRNNLayer(hidden_size, conv_size, hidden_size, layer_ids[i],
-                              pool=pool, center_conv=center_conv,
-                              zoneout=zoneout)
+            layer = QRNNLayer(hidden_size, conv_size, hidden_size,
+                              layer_ids[i], pool=pool, center_conv=center_conv,
+                              zoneout=zoneout, num_in_channels=i+1)
             self.layers.append(layer)
 
     def __call__(self, inputs, train=None):
