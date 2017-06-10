@@ -54,7 +54,7 @@ class SentimentModel:
                                  dtype=tf.int32,
                                  trainable=False,
                                  name='epoch')
-        self.best_dev_acc = tf.Variable(float('inf'),
+        self.best_dev_acc = tf.Variable(0.0,
                                         dtype=tf.float32,
                                         trainable=False,
                                         name='best_dev_acc')
