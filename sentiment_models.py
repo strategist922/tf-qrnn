@@ -143,6 +143,10 @@ class LSTMModel(SentimentModel):
             for i in range(num_layers)
         ])
         initial_state = cells.zero_state(self.batch_size, dtype=tf.float32)
-        x = tf.nn.dynamic_rnn(cells, x, initial_state=initial_state)
+        out, last_state = tf.nn.dynamic_rnn(cells, x,
+                                            initial_state=initial_state)
+
+        print out,
+        print last_state
 
         return tf.squeeze(x), None
