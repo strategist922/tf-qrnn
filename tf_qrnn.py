@@ -3,8 +3,7 @@ import tensorflow as tf
 
 class QRNNLayer:
     def __init__(self, input_size, conv_size, hidden_size, layer_id, pool='fo',
-                 zoneout=0.0, center_conv=False, feed_state=False,
-                 num_in_channels=1):
+                 zoneout=0.0, center_conv=False):
 
         pooling_functions = {
             'f': self.f_pool,
@@ -21,14 +20,12 @@ class QRNNLayer:
         self.pool_f = pooling_functions[pool]
         self.zoneout = zoneout
         self.center_conv = center_conv
-        self.feed_state = feed_state
-        self.num_in_channels = num_in_channels
         if center_conv:
             assert conv_size % 2 == 1
         init = tf.random_normal_initializer()
         filter_shape = [conv_size,
                         input_size,
-                        1,  # should this be 1 or num_in_channels?
+                        1,
                         hidden_size*(len(pool)+1)]
 
         with tf.variable_scope('QRNN/conv/'+str(layer_id)):
@@ -36,14 +33,10 @@ class QRNNLayer:
                                      initializer=init, dtype=tf.float32)
             self.b = tf.get_variable('b', [hidden_size*(len(pool)+1)],
                                      initializer=init, dtype=tf.float32)
-            if feed_state:
-                self.W_v = tf.get_variable('W_v', [hidden_size,
-                                                   hidden_size*(len(pool)+1)])
-                self.b_v = tf.get_variable('b_v', [hidden_size*(len(pool)+1)])
 
-    def __call__(self, inputs, state=None, train=None):
+    def __call__(self, inputs, train=None):
         inputs = tf.Print(inputs, [tf.reduce_sum(inputs)])
-        gates = self.conv(inputs, state)
+        gates = self.conv(inputs)
         if self.zoneout and self.zoneout > 0.0:
             F = gates[2]
             F = tf.cond(train,
@@ -52,8 +45,7 @@ class QRNNLayer:
             gates[2] = F
         return self.pool_f(gates)
 
-    def conv(self, inputs, state=None):
-        assert (state is not None) == self.feed_state
+    def conv(self, inputs):
         # input dims: [batch x seq x state x in]
         padded_inputs = self._pad_inputs(inputs, self.conv_size,
                                          self.center_conv)
@@ -65,18 +57,10 @@ class QRNNLayer:
         gates = tf.split(conv, (len(self.pool)+1), 3)
         # Z, F, O dims: [batch x seq x in x num_conv]
 
-        if self.feed_state:
-            print 'feeding state'
-            linear_state = tf.nn.xw_plus_b(state, self.W_v, self.b_v)
-            # linear_state dims: [batch x state*3]
-            state_gates = tf.split(linear_state, (len(self.pool)+1), 1)
-            for g, s_g in zip(gates, state_gates):
-                g += s_g
-
         # apply nonlinearities, turn into lists by seq
         gates[0] = tf.tanh(gates[0])
-        for g in gates[1:]:
-            g = tf.sigmoid(g)
+        for i in range(1, len(gates)):
+            gates[i] = tf.sigmoid(gates[i])
         print len(gates), gates[0]
         return gates  # list of gates ex. [Z, F, O]
 
@@ -142,8 +126,7 @@ class QRNNLayer:
 
 class DenseQRNNLayers:
     def __init__(self, input_size, conv_size, hidden_size, layer_ids,
-                 num_layers, zoneout=0.0, dropout=0.0, center_conv=False,
-                 feed_state=False):
+                 num_layers, zoneout=0.0, dropout=0.0, center_conv=False):
         self.layers = []
         self.num_layers = num_layers
         self.hidden_size = hidden_size
@@ -152,13 +135,10 @@ class DenseQRNNLayers:
             pool = 'fo' if i is not 0 else 'f'
             layer = QRNNLayer(input_size, conv_size, hidden_size, layer_ids[i],
                               pool=pool, center_conv=center_conv,
-                              zoneout=zoneout,
-                              feed_state=feed_state, num_in_channels=i+1)
+                              zoneout=zoneout)
             self.layers.append(layer)
 
-    def __call__(self, inputs, states=None, train=None):
-        if states is None:
-            states = [None] * self.num_layers
+    def __call__(self, inputs, train=None):
         inputs = tf.layers.dense(inputs, self.hidden_size)
         for layer in self.layers:
             outputs = layer(inputs, train=train)

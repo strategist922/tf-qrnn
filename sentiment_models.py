@@ -24,7 +24,7 @@ class SentimentModel:
         self.setup_learning(loss)
 
     def forward(self):
-        pass
+        raise NotImplementedError
 
     def inference(self, x):
         masks = self.masks
@@ -118,6 +118,8 @@ class DenseQRNNModel(SentimentModel):
         num_convs = 256
         conv_size = 2
         x = self._get_embeddings(inputs)
+        x = tf.layers.dense(tf.transpose(x, [0, 1, 3, 2]), num_convs)
+        x = tf.transpose(x, [0, 1, 3, 2])
         qrnn = DenseQRNNLayers(input_size,
                                conv_size,
                                num_convs,
