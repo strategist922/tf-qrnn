@@ -114,7 +114,7 @@ class DenseQRNNModel(SentimentModel):
         inputs = self.inputs
 
         num_layers = 4
-        input_size = 300
+        # input_size = 300
         num_convs = 256
         conv_size = 2
         x = self._get_embeddings(inputs)
@@ -123,7 +123,7 @@ class DenseQRNNModel(SentimentModel):
         print x
         x = tf.transpose(x, [0, 1, 3, 2])
         print x
-        qrnn = DenseQRNNLayers(input_size,
+        qrnn = DenseQRNNLayers(num_convs,
                                conv_size,
                                num_convs,
                                range(num_layers),
