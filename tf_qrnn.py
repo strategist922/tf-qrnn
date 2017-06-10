@@ -137,7 +137,9 @@ class DenseQRNNLayers:
             self.layers.append(layer)
 
     def __call__(self, inputs, train=None):
-        inputs = tf.layers.dense(inputs, self.hidden_size)
+        inputs = tf.layers.dense(tf.transpose(inputs, [0, 1, 3, 2]),
+                                 self.hidden_size)
+        inputs = tf.transpose(inputs, [0, 1, 3, 2])
         for layer in self.layers:
             outputs = layer(inputs, train=train)
             if self.dropout and self.dropout > 0:
