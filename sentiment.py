@@ -20,7 +20,6 @@ NUM_EPOCHS = 10
 BATCH_SIZE = 25
 SEQ_LEN = 200
 VOCAB_SIZE = 68379
-CKPT_PATH = './sentiment_checkpoints'
 # TODO
 # try LSTMModel
 # see if checkpointing works
@@ -65,6 +64,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
     saver = tf.train.Saver()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        ckpt_path = os.path.join('checkpoints', sys.argv[1])
         utils.check_restore_parameters(sess, saver, CKPT_PATH)
         best_dev_acc = model.best_dev_acc.eval()
         epoch = model.epoch.eval()
