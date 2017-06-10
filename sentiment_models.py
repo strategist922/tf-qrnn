@@ -118,8 +118,11 @@ class DenseQRNNModel(SentimentModel):
         num_convs = 256
         conv_size = 2
         x = self._get_embeddings(inputs)
+        print x
         x = tf.layers.dense(tf.transpose(x, [0, 1, 3, 2]), num_convs)
+        print x
         x = tf.transpose(x, [0, 1, 3, 2])
+        print x
         qrnn = DenseQRNNLayers(input_size,
                                conv_size,
                                num_convs,
@@ -141,6 +144,6 @@ class LSTMModel(SentimentModel):
         x = tf.squeeze(self._get_embeddings(inputs))
         cell = tf.contrib.rnn.BasicLSTMCell(hidden_size)
         cells = tf.contrib.rnn.MultiRNNCell([cell] * num_layers)
-        x = tf.nn.dynamic_rnn(cells, x)
+        x = tf.nn.dynamic_rnn(cells, x, dtype=tf.float32)
 
         return tf.squeeze(x), None
