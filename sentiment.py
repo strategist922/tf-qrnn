@@ -65,7 +65,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         ckpt_path = os.path.join('checkpoints', sys.argv[1])
-        utils.check_restore_parameters(sess, saver, CKPT_PATH)
+        utils.check_restore_parameters(sess, saver, ckpt_path)
         best_dev_acc = model.best_dev_acc.eval()
         epoch = model.epoch.eval()
 
@@ -97,7 +97,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
             if best_dev_acc is None or dev_acc >= best_dev_acc:
                 best_dev_acc = dev_acc
                 sess.run(tf.assign(model.best_dev_acc, best_dev_acc))
-                saver.save(sess, os.path.join(CKPT_PATH, sys.argv[1]))
+                saver.save(sess, os.path.join(ckpt_path, sys.argv[1]))
                 print 'saved new best dev acc'
 
             print 'epoch', i, 'took', time()-start, 'seconds'
