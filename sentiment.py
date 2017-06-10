@@ -92,6 +92,8 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
             print
             print 'average test loss:', test_loss
 
+            print 'epoch', i, 'took', time()-start, 'seconds'
+
             sess.run(tf.assign(model.epoch, i+1))
 
             if best_dev_acc is None or dev_acc >= best_dev_acc:
@@ -100,7 +102,7 @@ def train(vocab, embeddings, train_data, dev_data, test_data):
                 saver.save(sess, os.path.join(ckpt_path, sys.argv[1]))
                 print 'saved new best dev acc'
 
-            print 'epoch', i, 'took', time()-start, 'seconds'
+            print '-'*80
 
 
 def init_embeddings(embeddings, vocab, dim):
