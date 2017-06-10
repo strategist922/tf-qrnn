@@ -131,7 +131,7 @@ class DenseQRNNLayers:
         self.dropout = dropout
         for i in range(num_layers):
             pool = 'fo' if i is not 0 else 'f'
-            layer = QRNNLayer(input_size, conv_size, hidden_size, layer_ids[i],
+            layer = QRNNLayer(hidden_size, conv_size, hidden_size, layer_ids[i],
                               pool=pool, center_conv=center_conv,
                               zoneout=zoneout)
             self.layers.append(layer)
