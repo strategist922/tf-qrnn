@@ -149,4 +149,6 @@ class LSTMModel(SentimentModel):
         print out,
         print last_state
 
-        return tf.squeeze(x), None
+        out = tf.concat(out, 1)
+
+        return out, None

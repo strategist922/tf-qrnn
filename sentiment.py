@@ -18,7 +18,7 @@ models = {
 
 NUM_EPOCHS = 10
 BATCH_SIZE = 25
-SEQ_LEN = 400
+SEQ_LEN = 200
 VOCAB_SIZE = 68379
 CKPT_PATH = './sentiment_checkpoints'
 # TODO
