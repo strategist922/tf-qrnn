@@ -18,9 +18,9 @@ class SentimentModel:
 
         x, weights = self.forward()
         loss = self.inference(x)
-        # if weights:
-        #     for w in weights:
-        #         loss += beta*tf.nn.l2_loss(w)
+        if weights:
+            for w in weights:
+                loss += beta*tf.nn.l2_loss(w)
         self.setup_learning(loss)
 
     def forward(self):

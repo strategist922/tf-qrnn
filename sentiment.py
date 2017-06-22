@@ -21,8 +21,8 @@ BATCH_SIZE = 25
 SEQ_LEN = 400
 VOCAB_SIZE = 68379
 # TODO
+# try use L2 reg
 # try LSTMModel
-# see if checkpointing works
 # try dense
 # do penn treebank
 # some seq2seq task
