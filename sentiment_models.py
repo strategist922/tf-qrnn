@@ -30,10 +30,11 @@ class SentimentModel:
         masks = self.masks
         labels = self.labels
 
-        outputs = tf.layers.dense(x, 1)
+        outputs = tf.reduce_mean(x, -1)
         outputs = tf.squeeze(outputs) * masks
         # dims: [batch x seq]
-        logits = tf.squeeze(tf.layers.dense(outputs, 2))
+        avg_weight = tf.ones([self.seq_len, 2], tf.float32) / self.seq_len
+        logits = tf.squeeze(tf.matmul(outputs, avg_weight))
 
         pred = tf.nn.softmax(logits)
         pred = tf.argmax(pred, axis=1)

@@ -1,3 +1,4 @@
+'''Implementation of Quasi-Recurrent Neural Network in Tensorflow'''
 import tensorflow as tf
 
 
