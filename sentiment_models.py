@@ -37,10 +37,10 @@ class SentimentModel:
 
         # dims: [batch x state]
 
-        logits = tf.layers.dense(tf.squeeze(outputs), self.vocab_size)
+        logits = tf.layers.dense(tf.squeeze(outputs), 2)
 
         pred = tf.nn.softmax(logits)
-        pred = tf.argmax(pred, axis=1)
+        pred = tf.argmax(pred, -1)
 
         loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
                                                               labels=labels)
