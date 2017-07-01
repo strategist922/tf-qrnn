@@ -40,11 +40,12 @@ class SentimentModel:
         logits = tf.layers.dense(tf.squeeze(outputs), self.vocab_size)
 
         pred = tf.nn.softmax(logits)
+        pred = tf.argmax(pred, axis=1)
 
         loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
                                                               labels=labels)
         self.cost = tf.reduce_sum(loss) / self.batch_size
-        correct_prediction = tf.equal(tf.cast(tf.argmax(pred, 1), tf.int32), labels)
+        correct_prediction = tf.equal(tf.cast(pred, tf.int32), labels)
         self.accuracy = tf.reduce_sum(tf.cast(correct_prediction,
                                               tf.float32)) / self.batch_size
         self.average_guess = tf.reduce_sum(pred)
