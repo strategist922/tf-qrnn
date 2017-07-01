@@ -37,7 +37,7 @@ class SentimentModel:
 
         # dims: [batch x state]
 
-        logits = tf.layers.dense(tf.squeeze(outputs), self.VOCAB_SIZE)
+        logits = tf.layers.dense(tf.squeeze(outputs), self.vocab_size)
 
         pred = tf.nn.softmax(logits)
 
