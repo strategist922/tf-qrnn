@@ -32,7 +32,9 @@ class SentimentModel:
         labels = self.labels
         # x dims: [batch x seq x state]
 
-        outputs = tf.transpose(x, [0, 1, 2]) * masks
+        outputs = x * tf.expand_dims(masks, -1)
+        outputs = tf.reduce_mean(outputs, 1)
+
         # dims: [batch x state]
 
         logits = tf.dense(tf.squeeze(outputs), self.VOCAB_SIZE)
