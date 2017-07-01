@@ -3,9 +3,10 @@ from tf_qrnn import QRNNLayer, DenseQRNNLayers
 
 
 class SentimentModel:
-    def __init__(self, embeddings, BATCH_SIZE, SEQ_LEN, beta=4e-6):
+    def __init__(self, embeddings, BATCH_SIZE, SEQ_LEN, VOCAB_SIZE, beta=4e-6):
         self.batch_size = BATCH_SIZE
         self.seq_len = SEQ_LEN
+        self.vocab_size = VOCAB_SIZE
         self.embeddings = embeddings
 
         self.inputs = tf.placeholder(tf.int32, [BATCH_SIZE, SEQ_LEN],
@@ -29,15 +30,15 @@ class SentimentModel:
     def inference(self, x):
         masks = self.masks
         labels = self.labels
+        # x dims: [batch x seq x state]
 
-        outputs = tf.reduce_mean(x, -1)
-        outputs = tf.squeeze(outputs) * masks
-        # dims: [batch x seq]
-        avg_weight = tf.ones([self.seq_len, 2], tf.float32) / self.seq_len
-        logits = tf.squeeze(tf.matmul(outputs, avg_weight))
+        outputs = tf.transpose(x, [0, 2, 1]) * masks
+        # dims: [batch x state]
+
+        logits = tf.dense(tf.squeeze(outputs), self.VOCAB_SIZE)
 
         pred = tf.nn.softmax(logits)
-        pred = tf.argmax(pred, axis=1)
+
         loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
                                                               labels=labels)
         self.cost = tf.reduce_sum(loss) / self.batch_size

@@ -60,7 +60,7 @@ def run(model, sess, dataset, train=False):
 
 def train(vocab, embeddings, train_data, dev_data, test_data):
     Model = models[sys.argv[1]]
-    model = Model(embeddings, BATCH_SIZE, SEQ_LEN)
+    model = Model(embeddings, BATCH_SIZE, SEQ_LEN, VOCAB_SIZE)
     saver = tf.train.Saver()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
