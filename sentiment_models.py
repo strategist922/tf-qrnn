@@ -52,7 +52,7 @@ class SentimentModel:
         return loss
 
     def setup_learning(self, loss):
-        self.op = tf.train.RMSPropOptimizer().minimize(loss)
+        self.op = tf.train.RMSPropOptimizer(0.001).minimize(loss)
 
         # set up train vars
         self.epoch = tf.Variable(0,
