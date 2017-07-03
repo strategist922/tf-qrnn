@@ -73,7 +73,8 @@ class QRNNLayer:
             h = tf.multiply(F[i], H[-1]) + tf.multiply(1-F[i], Z[i])
             H.append(h)
         H = tf.stack(H[1:], axis=1)
-        return tf.transpose(H, perm=[0, 1, 3, 2])
+        H = tf.transpose(H, perm=[0, 1, 3, 2])
+        return H, tf.squeeze(tf.unstack(H, axis=1)[-1])
 
     def fo_pool(self, gates):
         Z, F, O = gates
@@ -88,7 +89,7 @@ class QRNNLayer:
             C.append(c)
             H.append(h)
         H = tf.stack(H, axis=1)
-        return tf.transpose(H, perm=[0, 1, 3, 2])
+        return tf.transpose(H, perm=[0, 1, 3, 2]), C[-1]
 
     def ifo_pool(self, gates):
         Z, F, O, I = gates
@@ -104,7 +105,7 @@ class QRNNLayer:
             C.append(c)
             H.append(h)
         H = tf.stack(H, axis=1)
-        return tf.transpose(H, perm=[0, 1, 3, 2])
+        return tf.transpose(H, perm=[0, 1, 3, 2]), C[-1]
 
     def _pad_inputs(self, inputs, conv_size, center_conv):
         # new input dims: [batch x seq x state x in]
@@ -143,11 +144,11 @@ class DenseQRNNLayers:
                                  self.hidden_size)
         inputs = tf.transpose(inputs, [0, 1, 3, 2])
         for layer in self.layers:
-            outputs = layer(inputs, train=train)
+            outputs, final_state = layer(inputs, train=train)
             if self.dropout and self.dropout > 0:
                 keep_prob = 1 - self.dropout
                 outputs = tf.cond(train,
                                   lambda: tf.nn.dropout(outputs, keep_prob),
                                   lambda: outputs)
             inputs = tf.concat([inputs, outputs], 3)
-        return tf.squeeze(outputs[:, :, :, -1])
+        return tf.squeeze(outputs[:, :, :, -1]), final_state

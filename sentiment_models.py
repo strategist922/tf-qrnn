@@ -98,8 +98,11 @@ class QRNNModel(SentimentModel):
         for i in range(num_layers):
             print 'initializing qrnn layer', i
             in_size = input_size if i == 0 else num_convs
-            layer = QRNNLayer(in_size, conv_size, num_convs, str(i),
-                              zoneout=0.0)
+            layer, final_state = QRNNLayer(in_size,
+                                           conv_size,
+                                           num_convs,
+                                           str(i),
+                                           zoneout=0.0)
             weights.append(layer.W)
             weights.append(layer.b)
             x = layer(x, train=self.train)
@@ -107,7 +110,7 @@ class QRNNModel(SentimentModel):
                         lambda: tf.nn.dropout(x, 0.7),
                         lambda: x)
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        return tf.unstack(x, axis=1)[-1], weights
+        return final_state, weights
 
 
 class DenseQRNNModel(SentimentModel):
@@ -125,9 +128,9 @@ class DenseQRNNModel(SentimentModel):
                                range(num_layers),
                                num_layers,
                                dropout=0.3)
-        x = qrnn(x, train=self.train)
+        x, final_state = qrnn(x, train=self.train)
         weights = [l.W for l in qrnn.layers] + [l.b for l in qrnn.layers]
-        return tf.unstack(tf.squeeze(x), axis=1)[-1], weights
+        return final_state, weights
 
 
 class LSTMModel(SentimentModel):
