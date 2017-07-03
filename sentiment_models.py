@@ -98,14 +98,14 @@ class QRNNModel(SentimentModel):
         for i in range(num_layers):
             print 'initializing qrnn layer', i
             in_size = input_size if i == 0 else num_convs
-            layer, final_state = QRNNLayer(in_size,
-                                           conv_size,
-                                           num_convs,
-                                           str(i),
-                                           zoneout=0.0)
+            layer = QRNNLayer(in_size,
+                              conv_size,
+                              num_convs,
+                              str(i),
+                              zoneout=0.0)
             weights.append(layer.W)
             weights.append(layer.b)
-            x = layer(x, train=self.train)
+            x, final_state = layer(x, train=self.train)
             x = tf.cond(self.train,
                         lambda: tf.nn.dropout(x, 0.7),
                         lambda: x)

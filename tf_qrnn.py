@@ -44,7 +44,8 @@ class QRNNLayer:
                         lambda: 1-tf.nn.dropout(F, 1-self.zoneout),
                         lambda: F)
             gates[2] = F
-        return self.pool_f(gates)
+        H, final_state = self.pool_f(gates)
+        return H, final_state
 
     def conv(self, inputs):
         # input dims: [batch x seq x state x in]
