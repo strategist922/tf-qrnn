@@ -110,7 +110,7 @@ class QRNNModel(SentimentModel):
                         lambda: tf.nn.dropout(x, 0.7),
                         lambda: x)
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        return final_state, weights
+        return tf.unstack(x, axis=1)[-1], weights
 
 
 class DenseQRNNModel(SentimentModel):
