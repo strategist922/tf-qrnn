@@ -28,16 +28,12 @@ class SentimentModel:
         raise NotImplementedError
 
     def inference(self, x):
-        masks = self.masks
+        # masks = self.masks
         labels = self.labels
-        # x dims: [batch x seq x state]
-
-        outputs = x * tf.expand_dims(masks, -1)
-        outputs = tf.reduce_mean(outputs, 1)
 
         # dims: [batch x state]
 
-        logits = tf.layers.dense(tf.squeeze(outputs), 2)
+        logits = tf.layers.dense(tf.squeeze(x), 2)
 
         pred = tf.nn.softmax(logits)
         pred = tf.argmax(pred, -1)
@@ -111,7 +107,7 @@ class QRNNModel(SentimentModel):
                         lambda: tf.nn.dropout(x, 0.7),
                         lambda: x)
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        return x, weights
+        return tf.unstack(x, axis=1)[-1], weights
 
 
 class DenseQRNNModel(SentimentModel):
