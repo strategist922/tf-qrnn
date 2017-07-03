@@ -82,7 +82,7 @@ class VanillaNNModel(SentimentModel):
                         lambda: x)
 
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        return x, None
+        return tf.reduce_mean(x, axis=1), None
 
 
 class QRNNModel(SentimentModel):
@@ -127,7 +127,7 @@ class DenseQRNNModel(SentimentModel):
                                dropout=0.3)
         x = qrnn(x, train=self.train)
         weights = [l.W for l in qrnn.layers] + [l.b for l in qrnn.layers]
-        return tf.squeeze(x), weights
+        return tf.unstack(tf.squeeze(x), axis=1)[-1], weights
 
 
 class LSTMModel(SentimentModel):
@@ -146,10 +146,5 @@ class LSTMModel(SentimentModel):
         initial_state = cells.zero_state(self.batch_size, dtype=tf.float32)
         out, last_state = tf.nn.dynamic_rnn(cells, x,
                                             initial_state=initial_state)
-
-        print out,
-        print last_state
-
         out = tf.concat(out, 1)
-
-        return out, None
+        return last_state, None
