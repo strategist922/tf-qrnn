@@ -33,10 +33,10 @@ def run(model, sess, dataset, train=False):
     prog = utils.Progbar(len(dataset))
     avg_loss = 0.0
     avg_correct = 0.0
-    for x, masks, y in dataset:
+    for x, lens, y in dataset:
         input_feed = {
             model.inputs: utils.convert_to_np(x),
-            model.masks: utils.convert_to_np(masks),
+            model.lens: utils.convert_to_np(lens),
             model.labels: utils.convert_to_np(y),
             model.train: train
         }

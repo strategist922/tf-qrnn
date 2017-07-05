@@ -11,8 +11,8 @@ class SentimentModel:
 
         self.inputs = tf.placeholder(tf.int32, [BATCH_SIZE, SEQ_LEN],
                                      name="inputs")
-        self.masks = tf.placeholder(tf.float32, [BATCH_SIZE, SEQ_LEN],
-                                    name="mask")
+        self.lens = tf.placeholder(tf.float32, [BATCH_SIZE, SEQ_LEN],
+                                   name="lens")
         self.labels = tf.placeholder(tf.int32, [BATCH_SIZE], name="labels")
 
         self.train = tf.placeholder(tf.bool, [], name='train')
@@ -28,7 +28,6 @@ class SentimentModel:
         raise NotImplementedError
 
     def inference(self, x):
-        # masks = self.masks
         labels = self.labels
 
         # dims: [batch x state]
@@ -110,7 +109,11 @@ class QRNNModel(SentimentModel):
                         lambda: tf.nn.dropout(x, 0.7),
                         lambda: x)
         x = tf.squeeze(x)  # dims: [batch x seq x state]
-        return tf.unstack(x, axis=1)[-1], weights
+        lens = self.lens
+        final_states = []
+        for i, point in enumerate(tf.unstack(x, axis=0)):
+            final_states.append(point[lens[i]-1, :])
+        return tf.stack(x, axis=0), weights
 
 
 class DenseQRNNModel(SentimentModel):
@@ -130,7 +133,11 @@ class DenseQRNNModel(SentimentModel):
                                dropout=0.3)
         x, final_state = qrnn(x, train=self.train)
         weights = [l.W for l in qrnn.layers] + [l.b for l in qrnn.layers]
-        return final_state, weights
+        lens = self.lens
+        final_states = []
+        for i, point in enumerate(tf.unstack(x, axis=0)):
+            final_states.append(point[lens[i]-1, :])
+        return tf.stack(x, axis=0), weights
 
 
 class LSTMModel(SentimentModel):

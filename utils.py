@@ -51,7 +51,7 @@ class imdbDataset(Dataset):
     def __init__(self, dataset, seq_len=100):
         self.x = dataset[0]
         self.pad_inputs(seq_len)
-        self.get_masks(seq_len)
+        self.get_lengths(seq_len)
         self.y = dataset[1]
 
     def pad_inputs(self, seq_len):
@@ -65,19 +65,16 @@ class imdbDataset(Dataset):
             new_xs.append(x)
         self.x = new_xs
 
-    def get_masks(self, seq_len):
-        self.masks = []
+    def get_lengths(self, seq_len):
+        self.lens = []
         for x in self.x:
-            mask = [1.0 * (x_i != 0) for x_i in x]
-            assert len(mask) == seq_len
-            self.masks.append(mask)
-        # self.masks = np.array(self.masks)
+            self.lens.append(len(x))
 
     def __len__(self):
         return len(self.x)
 
     def __getitem__(self, i):
-        return self.x[i], self.masks[i], self.y[i]
+        return self.x[i], self.lens[i], self.y[i]
 
 
 def get_datasets(batch_size=100, num_words=50000, seq_len=100):

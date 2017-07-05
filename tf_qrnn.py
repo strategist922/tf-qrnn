@@ -24,7 +24,7 @@ class QRNNLayer:
         self.num_in_channels = num_in_channels
         if center_conv:
             assert conv_size % 2 == 1
-        init = tf.random_normal_initializer()
+        init = tf.contrib.layers.xavier_initializer()
         filter_shape = [conv_size,
                         input_size,
                         num_in_channels,
