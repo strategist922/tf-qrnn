@@ -31,7 +31,6 @@ class SentimentModel:
         labels = self.labels
 
         # dims: [batch x state]
-        print x
         logits = tf.layers.dense(tf.squeeze(x), 2)
 
         pred = tf.nn.softmax(logits)
@@ -113,10 +112,7 @@ class QRNNModel(SentimentModel):
         final_states = []
         for i, point in enumerate(tf.unstack(x, axis=0)):
             final_states.append(tf.squeeze(point[lens[i]-1, :]))
-        print point
-        print tf.squeeze(point[lens[i]-1, :])
-        print tf.stack(x, axis=0)
-        return tf.stack(x, axis=0), weights
+        return tf.stack(final_states, axis=0), weights
 
 
 class DenseQRNNModel(SentimentModel):
