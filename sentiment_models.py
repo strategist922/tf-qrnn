@@ -112,6 +112,8 @@ class QRNNModel(SentimentModel):
         lens = self.lens
         final_states = []
         for i, point in enumerate(tf.unstack(x, axis=0)):
+            print i, lens[i]
+            print point
             final_states.append(tf.squeeze(point[lens[i]-1, :]))
         return tf.stack(x, axis=0), weights
 
