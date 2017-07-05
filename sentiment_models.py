@@ -11,7 +11,7 @@ class SentimentModel:
 
         self.inputs = tf.placeholder(tf.int32, [BATCH_SIZE, SEQ_LEN],
                                      name="inputs")
-        self.lens = tf.placeholder(tf.float32, [BATCH_SIZE, SEQ_LEN],
+        self.lens = tf.placeholder(tf.float32, [BATCH_SIZE],
                                    name="lens")
         self.labels = tf.placeholder(tf.int32, [BATCH_SIZE], name="labels")
 
